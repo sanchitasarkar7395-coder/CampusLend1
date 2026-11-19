@@ -1,0 +1,6 @@
+{
+  "name": "CampusLend",
+  "description": "Verified peer-to-peer campus gear rental and marketplace for DBS Global University (DGU) Dehradun students.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

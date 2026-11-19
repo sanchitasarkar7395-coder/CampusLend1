@@ -1,0 +1,306 @@
+import {
+  CatalogItem,
+  DropSpot,
+  DurationOption,
+  HostelBlock,
+  ItemCategory,
+  RentalOrder,
+  StudentProfile,
+} from '../types';
+
+export const PLATFORM_SERVICE_FEE = 50;
+
+export const CATEGORIES: ('All' | ItemCategory)[] = [
+  'All',
+  'Hostel Appliances',
+  'Formal & Placement Attire',
+  'Academic & Lab Gear',
+  'Mobility',
+];
+
+export const HOSTEL_BLOCKS: HostelBlock[] = [
+  'Boys Hostel A',
+  'Boys Hostel B',
+  'Girls Hostel A',
+  'Girls Hostel B',
+  'Prem Nagar PG',
+  'Bidholi Student PG',
+  'Selaqui Annex PG',
+];
+
+export const DROP_SPOTS: { name: DropSpot; timing: string; landmark: string }[] = [
+  {
+    name: 'Main Cafeteria',
+    timing: '8:30 AM – 8:00 PM',
+    landmark: 'Ground floor seating near Nescafe counter',
+  },
+  {
+    name: 'Hostel Common Room',
+    timing: '7:00 AM – 10:00 PM',
+    landmark: 'Warden desk lobby with power socket for testing',
+  },
+  {
+    name: 'Campus Main Gate',
+    timing: '9:00 AM – 6:00 PM',
+    landmark: 'Security check-post shade near main roundabout',
+  },
+  {
+    name: 'Central Library Steps',
+    timing: '9:00 AM – 7:30 PM',
+    landmark: 'Academic Block entrance foyer',
+  },
+];
+
+export const SAMPLE_IMAGES: { label: string; category: ItemCategory; url: string }[] = [
+  {
+    label: 'Induction Cooktop',
+    category: 'Hostel Appliances',
+    url: '/src/assets/images/gear_induction_cooktop_1795118666977.jpg',
+  },
+  {
+    label: 'Placement Blazer',
+    category: 'Formal & Placement Attire',
+    url: '/src/assets/images/gear_interview_blazer_1795118695065.jpg',
+  },
+  {
+    label: 'Ceramic Room Heater',
+    category: 'Hostel Appliances',
+    url: '/src/assets/images/gear_room_heater_1795118670202.jpg',
+  },
+  {
+    label: 'Electric Kettle',
+    category: 'Hostel Appliances',
+    url: '/src/assets/images/gear_electric_kettle_1795118670800.jpg',
+  },
+  {
+    label: 'Lab Coat & Drafting Kit',
+    category: 'Academic & Lab Gear',
+    url: '/src/assets/images/gear_lab_coat_kit_1795118672040.jpg',
+  },
+  {
+    label: 'Campus Commuter Bicycle',
+    category: 'Mobility',
+    url: '/src/assets/images/gear_campus_bicycle_1795118671687.jpg',
+  },
+];
+
+export const DURATION_OPTIONS: DurationOption[] = [
+  {
+    id: '3_days',
+    label: '3 Days (Event)',
+    sublabel: 'Placements, exams or short weekend need',
+    days: 3,
+    getFee: (item) =>
+      item.billingUnit === 'event' ? item.rate : Math.max(80, Math.round(item.rate * 0.45)),
+  },
+  {
+    id: '1_month',
+    label: '1 Month',
+    sublabel: 'Flexible hostel monthly cycle',
+    days: 30,
+    getFee: (item) =>
+      item.billingUnit === 'month' ? item.rate : Math.round(item.rate * 2.4),
+  },
+  {
+    id: '1_semester',
+    label: '1 Semester (4 Months)',
+    sublabel: 'Best value — 20% semester bundle savings',
+    days: 120,
+    getFee: (item) => {
+      const monthly = item.billingUnit === 'month' ? item.rate : Math.round(item.rate * 2.4);
+      return Math.round(monthly * 4 * 0.8);
+    },
+  },
+];
+
+export function calculateSavingsPercent(item: CatalogItem): number {
+  if (item.retailPrice <= 0) return 0;
+  const pct = Math.round(((item.retailPrice - item.rate) / item.retailPrice) * 100);
+  return Math.max(10, Math.min(96, pct));
+}
+
+export const INITIAL_CATALOG_ITEMS: CatalogItem[] = [
+  {
+    id: 'item-induction-01',
+    title: 'Prestige PIC 20 Induction Cooktop (1600W)',
+    category: 'Hostel Appliances',
+    description:
+      'Feather-touch preset panel, Indian menu modes, works with flat steel utensils. Ideal for late-night Maggi, chai, and exam-week meals in hostel.',
+    imageUrl: '/src/assets/images/gear_induction_cooktop_1795118666977.jpg',
+    lenderName: 'Rohan Negi',
+    lenderRole: 'MBA Final Year',
+    lenderRollNo: '0241MBA089',
+    lenderVerified: true,
+    hostelBlock: 'Boys Hostel B',
+    condition: 'Mint',
+    conditionNote: 'Like New · Tested',
+    rate: 180,
+    billingUnit: 'month',
+    retailPrice: 2895,
+    deposit: 500,
+    available: true,
+    createdAt: '2 days ago',
+  },
+  {
+    id: 'item-blazer-02',
+    title: 'Raymond Tailored Navy Placement Blazer (Size 40)',
+    category: 'Formal & Placement Attire',
+    description:
+      'Dry-cleaned slim-fit navy formal blazer with breathable lining. Worn twice during summer internship interviews — crisp shoulders and zero creases.',
+    imageUrl: '/src/assets/images/gear_interview_blazer_1795118695065.jpg',
+    lenderName: 'Ananya Rawat',
+    lenderRole: 'MBA Finance Senior',
+    lenderRollNo: '0241MBA112',
+    lenderVerified: true,
+    hostelBlock: 'Girls Hostel A',
+    condition: 'Mint',
+    conditionNote: 'Dry-Cleaned · Mint',
+    rate: 150,
+    billingUnit: 'event',
+    retailPrice: 5499,
+    deposit: 600,
+    available: true,
+    createdAt: '4 hours ago',
+  },
+  {
+    id: 'item-heater-03',
+    title: 'Orpat Oscillating Ceramic Room Heater (2000W)',
+    category: 'Hostel Appliances',
+    description:
+      'Compact Dehradun winter essential with dual heat settings, tip-over safety cut-off, and quiet fan mode. Heats a twin-sharing room in 10 minutes.',
+    imageUrl: '/src/assets/images/gear_room_heater_1795118670202.jpg',
+    lenderName: 'Aditya Joshi',
+    lenderRole: 'B.Tech CSE · 4th Year',
+    lenderRollNo: '0231BTC047',
+    lenderVerified: true,
+    hostelBlock: 'Prem Nagar PG',
+    condition: 'Good',
+    conditionNote: 'Like New · Checked',
+    rate: 220,
+    billingUnit: 'month',
+    retailPrice: 2450,
+    deposit: 500,
+    available: true,
+    createdAt: 'Yesterday',
+  },
+  {
+    id: 'item-kettle-04',
+    title: 'Pigeon Amaze 1.5L Stainless Steel Electric Kettle',
+    category: 'Hostel Appliances',
+    description:
+      'Fast-boil concealed heating element with auto shut-off and 360-degree swivel base. Descaled and sanitized before listing.',
+    imageUrl: '/src/assets/images/gear_electric_kettle_1795118670800.jpg',
+    lenderName: 'Sneha Bisht',
+    lenderRole: 'MBA Marketing',
+    lenderRollNo: '0241MBA156',
+    lenderVerified: true,
+    hostelBlock: 'Girls Hostel B',
+    condition: 'Mint',
+    conditionNote: 'Sanitized · Checked',
+    rate: 110,
+    billingUnit: 'month',
+    retailPrice: 1295,
+    deposit: 300,
+    available: true,
+    createdAt: '3 days ago',
+  },
+  {
+    id: 'item-labkit-05',
+    title: 'Cotton Lab Coat (Size M) + Casio fx-991CW & Drafting Kit',
+    category: 'Academic & Lab Gear',
+    description:
+      'Complete semester lab & engineering drawing bundle. Includes freshly laundered full-sleeve cotton apron, metal compass box, and non-programmable scientific calculator.',
+    imageUrl: '/src/assets/images/gear_lab_coat_kit_1795118672040.jpg',
+    lenderName: 'Karanveer Singh',
+    lenderRole: 'B.Pharm Senior',
+    lenderRollNo: '0231BPH021',
+    lenderVerified: true,
+    hostelBlock: 'Boys Hostel A',
+    condition: 'Good',
+    conditionNote: 'Complete Set · Checked',
+    rate: 120,
+    billingUnit: 'month',
+    retailPrice: 2350,
+    deposit: 350,
+    available: true,
+    createdAt: '5 days ago',
+  },
+  {
+    id: 'item-cycle-06',
+    title: 'Decathlon Riverside Hybrid Campus Bicycle + Lock',
+    category: 'Mobility',
+    description:
+      'Lightweight matte charcoal commuter bike with rear rack, puncture-resistant tires, and heavy-duty combination cable lock. Great for Prem Nagar errands and campus rides.',
+    imageUrl: '/src/assets/images/gear_campus_bicycle_1795118671687.jpg',
+    lenderName: 'Pranav Kulkarni',
+    lenderRole: 'MBA Operations',
+    lenderRollNo: '0241MBA034',
+    lenderVerified: true,
+    hostelBlock: 'Boys Hostel B',
+    condition: 'Good',
+    conditionNote: 'Serviced · Ready',
+    rate: 390,
+    billingUnit: 'month',
+    retailPrice: 14999,
+    deposit: 1000,
+    available: true,
+    createdAt: '1 week ago',
+  },
+];
+
+export const INITIAL_STUDENT_PROFILE: StudentProfile = {
+  fullName: 'Aarav Sharma',
+  email: '',
+  rollNumber: '',
+  program: 'MBA · Batch 2025–27',
+  hostelBlock: 'Boys Hostel B',
+  isSignedIn: false,
+  isVerified: false,
+};
+
+export const INITIAL_RENTALS: RentalOrder[] = [
+  {
+    id: 'CL-DDN-8412',
+    itemId: 'item-kettle-04',
+    itemTitle: 'Pigeon Amaze 1.5L Stainless Steel Electric Kettle',
+    itemImage: '/src/assets/images/gear_electric_kettle_1795118670800.jpg',
+    itemCategory: 'Hostel Appliances',
+    lenderName: 'Sneha Bisht',
+    lenderHostel: 'Girls Hostel B',
+    durationLabel: '1 Month',
+    durationId: '1_month',
+    rentalFee: 110,
+    depositAmount: 300,
+    platformFee: 50,
+    totalPaid: 460,
+    retailPrice: 1295,
+    dropSpot: 'Main Cafeteria',
+    conditionCheckedIn: true,
+    escrowStatus: 'Deposit Held Safely',
+    upiRef: 'UPI432198074512',
+    bookedAt: '12 Nov 2026',
+    returnDueDate: '12 Dec 2026',
+  },
+  {
+    id: 'CL-DDN-7903',
+    itemId: 'item-blazer-02',
+    itemTitle: 'Raymond Tailored Navy Placement Blazer (Size 40)',
+    itemImage: '/src/assets/images/gear_interview_blazer_1795118695065.jpg',
+    itemCategory: 'Formal & Placement Attire',
+    lenderName: 'Ananya Rawat',
+    lenderHostel: 'Girls Hostel A',
+    durationLabel: '3 Days (Event)',
+    durationId: '3_days',
+    rentalFee: 150,
+    depositAmount: 600,
+    platformFee: 50,
+    totalPaid: 800,
+    retailPrice: 5499,
+    dropSpot: 'Campus Main Gate',
+    conditionCheckedIn: true,
+    escrowStatus: 'Deposit Refunded',
+    upiRef: 'UPI431044281905',
+    bookedAt: '02 Nov 2026',
+    returnDueDate: '05 Nov 2026',
+  },
+];
