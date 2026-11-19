@@ -1,3 +1,4 @@
+import { Analytics, getAnalytics, isSupported } from 'firebase/analytics';
 import { FirebaseApp, getApps, initializeApp } from 'firebase/app';
 import {
   Auth,
@@ -11,22 +12,17 @@ import {
 
 /**
  * CampusLend Firebase Configuration
- * ------------------------------------------------------------
- * Paste your Firebase Web App credentials below (from Firebase
- * Console -> Project Settings -> Your apps -> SDK setup) or set
- * the matching VITE_FIREBASE_* environment variables.
- *
- * Make sure "Google" is enabled under Firebase Console ->
- * Authentication -> Sign-in method, and your preview domain is
- * listed under Authentication -> Settings -> Authorized domains.
+ * Project: campus-501ec
  */
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'YOUR_FIREBASE_API_KEY',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'YOUR_PROJECT_ID',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'YOUR_PROJECT_ID.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || 'YOUR_MESSAGING_SENDER_ID',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || 'YOUR_FIREBASE_APP_ID',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyB26LgVIt-oy1SO1YhefBDon8O1rD9EOfc',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'campus-501ec.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'campus-501ec',
+  storageBucket:
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'campus-501ec.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '166676710317',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:166676710317:web:9837b1f62be5074605d724',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-G7GWQ0M87S',
 };
 
 function isValidConfigValue(value: string | undefined): boolean {
@@ -43,6 +39,7 @@ export const isFirebaseConfigured: boolean =
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
+let analytics: Analytics | null = null;
 
 if (isFirebaseConfigured) {
   try {
@@ -50,6 +47,18 @@ if (isFirebaseConfigured) {
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    if (typeof window !== 'undefined') {
+      isSupported()
+        .then((supported) => {
+          if (supported && app) {
+            analytics = getAnalytics(app);
+          }
+        })
+        .catch(() => {
+          // Analytics is optional in restricted iframe contexts
+        });
+    }
   } catch (error) {
     console.warn('Firebase initialization skipped due to invalid config:', error);
     app = null;
@@ -58,7 +67,7 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { app, auth, googleProvider };
+export { analytics, app, auth, googleProvider };
 
 export interface GoogleAuthResult {
   uid: string;
