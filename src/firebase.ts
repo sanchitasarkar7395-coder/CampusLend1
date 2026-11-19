@@ -1,4 +1,3 @@
-import { Analytics, getAnalytics, isSupported } from 'firebase/analytics';
 import { FirebaseApp, getApps, initializeApp } from 'firebase/app';
 import {
   Auth,
@@ -10,26 +9,43 @@ import {
   signOut,
 } from 'firebase/auth';
 
-/**
- * CampusLend Firebase Configuration
- * Project: campus-501ec
- */
-export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyB26LgVIt-oy1SO1YhefBDon8O1rD9EOfc',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'campus-501ec.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'campus-501ec',
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'campus-501ec.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '166676710317',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:166676710317:web:9837b1f62be5074605d724',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-G7GWQ0M87S',
-};
-
 function isValidConfigValue(value: string | undefined): boolean {
   if (!value) return false;
   const trimmed = value.trim();
   return trimmed.length > 0 && !trimmed.startsWith('YOUR_');
 }
+
+function resolveConfig(envValue: string | undefined, fallback: string): string {
+  return isValidConfigValue(envValue) ? envValue!.trim() : fallback;
+}
+
+/**
+ * CampusLend Firebase Configuration
+ * Project: teak-composition-97cdj
+ */
+export const firebaseConfig = {
+  apiKey: resolveConfig(
+    import.meta.env.VITE_FIREBASE_API_KEY,
+    'AIzaSyAqkoTGbW4hyluO0OjPSgsonsL3IVHusZM'
+  ),
+  authDomain: resolveConfig(
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    'teak-composition-97cdj.firebaseapp.com'
+  ),
+  projectId: resolveConfig(import.meta.env.VITE_FIREBASE_PROJECT_ID, 'teak-composition-97cdj'),
+  storageBucket: resolveConfig(
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    'teak-composition-97cdj.firebasestorage.app'
+  ),
+  messagingSenderId: resolveConfig(
+    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    '786799230558'
+  ),
+  appId: resolveConfig(
+    import.meta.env.VITE_FIREBASE_APP_ID,
+    '1:786799230558:web:1b264bb0cdd8d0b858fecf'
+  ),
+};
 
 export const isFirebaseConfigured: boolean =
   isValidConfigValue(firebaseConfig.apiKey) &&
@@ -39,7 +55,6 @@ export const isFirebaseConfigured: boolean =
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
-let analytics: Analytics | null = null;
 
 if (isFirebaseConfigured) {
   try {
@@ -47,18 +62,6 @@ if (isFirebaseConfigured) {
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-    if (typeof window !== 'undefined') {
-      isSupported()
-        .then((supported) => {
-          if (supported && app) {
-            analytics = getAnalytics(app);
-          }
-        })
-        .catch(() => {
-          // Analytics is optional in restricted iframe contexts
-        });
-    }
   } catch (error) {
     console.warn('Firebase initialization skipped due to invalid config:', error);
     app = null;
@@ -67,7 +70,7 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { analytics, app, auth, googleProvider };
+export { app, auth, googleProvider };
 
 export interface GoogleAuthResult {
   uid: string;

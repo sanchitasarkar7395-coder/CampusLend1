@@ -131,14 +131,23 @@ export function VerifyStudentModal({
       const authErr = err as { code?: string; message?: string };
       if (authErr.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in popup was closed before completing sign-in.');
-      } else if (authErr.code === 'auth/unauthorized-domain') {
+      } else if (authErr.code === 'auth/popup-blocked') {
         setError(
-          'This preview domain is not authorized in your Firebase project yet. Add it under Firebase Console -> Authentication -> Settings -> Authorized domains, or use Demo Google Sign-In.'
+          'Your browser blocked the Google sign-in popup. Allow popups for this site and try again, or use Demo Google Sign-In.'
+        );
+      } else if (authErr.code === 'auth/unauthorized-domain') {
+        const host = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
+        setError(
+          `Add "${host}" under Firebase Console -> Authentication -> Settings -> Authorized domains, then retry — or use Demo Google Sign-In below.`
+        );
+      } else if (authErr.code === 'auth/operation-not-allowed') {
+        setError(
+          'Google Sign-In is not enabled yet in Firebase Console -> Authentication -> Sign-in method. Enable Google there, or use Demo Google Sign-In.'
         );
       } else {
         setError(
           authErr.message ||
-            'Could not complete Google Sign-In. Check your Firebase config or use Demo Google Sign-In.'
+            'Could not complete Google Sign-In. Check your Firebase project settings or use Demo Google Sign-In.'
         );
       }
     } finally {
