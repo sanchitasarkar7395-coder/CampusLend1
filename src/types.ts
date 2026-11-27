@@ -52,12 +52,15 @@ export type EscrowStatus =
   | 'In Use · Checked In'
   | 'Deposit Refunded';
 
+export type OrderRole = 'borrowed' | 'lent';
+
 export interface RentalOrder {
   id: string;
   itemId: string;
   itemTitle: string;
   itemImage: string;
   itemCategory: ItemCategory;
+  orderRole: OrderRole;
   lenderName: string;
   lenderHostel: HostelBlock;
   borrowerName?: string;
@@ -74,8 +77,11 @@ export interface RentalOrder {
   conditionCheckedIn: boolean;
   escrowStatus: EscrowStatus;
   upiRef: string;
+  paymentMethod?: string;
+  paymentTimestamp?: string;
   bookedAt: string;
   returnDueDate: string;
+  returnedAt?: string;
 }
 
 export interface StudentProfile {

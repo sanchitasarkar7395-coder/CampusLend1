@@ -3,8 +3,8 @@ import { CheckCircle2, X } from 'lucide-react';
 import { BookingDrawer } from './components/BookingDrawer';
 import { BrowseView } from './components/BrowseView';
 import { ListItemView } from './components/ListItemView';
-import { MyRentalsView } from './components/MyRentalsView';
 import { Navigation } from './components/Navigation';
+import { OrderHistoryView } from './components/OrderHistoryView';
 import { ProfileView } from './components/ProfileView';
 import { VerifyStudentModal } from './components/VerifyStudentModal';
 import {
@@ -95,29 +95,23 @@ export default function App() {
     );
   };
 
-  const handleConfirmPickup = (orderId: string) => {
-    setRentals((prev) =>
-      prev.map((order) =>
-        order.id === orderId
-          ? { ...order, escrowStatus: 'In Use · Checked In', conditionCheckedIn: true }
-          : order
-      )
-    );
-    setToastMessage(`Condition check-in recorded for ${orderId}.`);
-  };
-
   const handleReturnAndRefund = (orderId: string) => {
     const target = rentals.find((r) => r.id === orderId);
+    const todayLabel = new Date().toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
     setRentals((prev) =>
       prev.map((order) =>
         order.id === orderId
-          ? { ...order, escrowStatus: 'Deposit Refunded' }
+          ? { ...order, escrowStatus: 'Deposit Refunded', returnedAt: todayLabel }
           : order
       )
     );
     if (target) {
       setToastMessage(
-        `Return verified — ₹${target.depositAmount} escrow deposit refunded via UPI.`
+        `${target.id} marked returned — ₹${target.depositAmount} escrow deposit refunded via UPI.`
       );
     }
   };
@@ -166,11 +160,12 @@ export default function App() {
         )}
 
         {activeTab === 'rentals' && (
-          <MyRentalsView
+          <OrderHistoryView
             rentals={rentals}
-            onConfirmPickup={handleConfirmPickup}
+            profile={profile}
             onReturnAndRefund={handleReturnAndRefund}
             onGoToBrowse={() => handleTabChange('browse')}
+            onOpenVerifyModal={() => setIsVerifyModalOpen(true)}
           />
         )}
 

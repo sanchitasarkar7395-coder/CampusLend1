@@ -47,11 +47,11 @@ export function Navigation({
     { id: 'browse', label: 'Browse', mobileLabel: 'Browse' },
     {
       id: 'rentals',
-      label: activeRentalsCount > 0 ? `My Rentals (${activeRentalsCount})` : 'My Rentals',
-      mobileLabel: 'Rentals',
+      label: activeRentalsCount > 0 ? `Order History (${activeRentalsCount})` : 'Order History',
+      mobileLabel: 'Orders',
       count: activeRentalsCount,
     },
-    { id: 'list', label: 'List Item', mobileLabel: 'List' },
+    { id: 'list', label: 'My Listings', mobileLabel: 'Listings' },
     { id: 'profile', label: 'Profile', mobileLabel: 'Profile' },
   ];
 

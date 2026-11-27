@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
+  History,
   Lock,
   MapPin,
   Search,
@@ -23,6 +24,26 @@ interface BrowseViewProps {
 
 type SortOption = 'recommended' | 'price_low' | 'savings_high';
 
+const RECENT_SEARCHES_KEY = 'campuslend_recent_searches';
+const DEFAULT_RECENT_SEARCHES = ['Induction', 'Blazer', 'Room Heater'];
+const MAX_RECENT_SEARCHES = 3;
+
+function loadRecentSearches(): string[] {
+  try {
+    const raw = window.localStorage.getItem(RECENT_SEARCHES_KEY);
+    if (!raw) return DEFAULT_RECENT_SEARCHES;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((term): term is string => typeof term === 'string' && term.trim().length > 0)
+        .slice(0, MAX_RECENT_SEARCHES);
+    }
+  } catch {
+    // Ignore storage access errors in restricted contexts
+  }
+  return DEFAULT_RECENT_SEARCHES;
+}
+
 export function BrowseView({
   items,
   profile,
@@ -33,6 +54,50 @@ export function BrowseView({
   const [selectedCategory, setSelectedCategory] = useState<Category>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('recommended');
+  const [recentSearches, setRecentSearches] = useState<string[]>(loadRecentSearches);
+
+  const saveRecentSearch = useCallback((rawTerm: string) => {
+    const term = rawTerm.trim();
+    if (term.length < 2) return;
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((item) => item.toLowerCase() !== term.toLowerCase());
+      const next = [term, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+      try {
+        window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      } catch {
+        // Ignore storage write errors
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) return;
+    const timer = window.setTimeout(() => {
+      saveRecentSearch(trimmed);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery, saveRecentSearch]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveRecentSearch(searchQuery);
+  };
+
+  const handleSelectRecent = (term: string) => {
+    setSearchQuery(term);
+    saveRecentSearch(term);
+  };
+
+  const handleClearRecentSearches = () => {
+    setRecentSearches([]);
+    try {
+      window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify([]));
+    } catch {
+      // Ignore storage write errors
+    }
+  };
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -87,13 +152,14 @@ export function BrowseView({
           </p>
 
           {/* Search Input + Secondary Action */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleSearchSubmit} className="mt-6 flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => saveRecentSearch(searchQuery)}
                 placeholder="Search induction, blazer, heater, Boys Hostel B..."
                 aria-label="Search campus gear catalog"
                 className="w-full min-h-[46px] pl-10 pr-10 rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent transition-colors"
@@ -118,7 +184,46 @@ export function BrowseView({
               <span>Earn from Idle Gear</span>
               <ArrowRight className="w-4 h-4 text-[#1E3A8A]" />
             </button>
-          </div>
+          </form>
+
+          {/* Recent Searches (Last 3 Terms) */}
+          {recentSearches.length > 0 && (
+            <div
+              aria-label="Recent searches"
+              className="mt-3.5 flex flex-wrap items-center gap-2"
+            >
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 whitespace-nowrap">
+                <History className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
+                <span>Recent searches:</span>
+              </span>
+
+              {recentSearches.map((term) => {
+                const isSelected = searchQuery.trim().toLowerCase() === term.toLowerCase();
+                return (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => handleSelectRecent(term)}
+                    className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] ${
+                      isSelected
+                        ? 'bg-[#1E3A8A] text-white font-semibold'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
+                    }`}
+                  >
+                    {term}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={handleClearRecentSearches}
+                className="text-xs font-medium text-slate-400 hover:text-slate-700 hover:underline px-1.5 py-1 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Contextual Gmail Login & Student Verification Strip */}

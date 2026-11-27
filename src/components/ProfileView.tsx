@@ -35,10 +35,16 @@ export function ProfileView({
 }: ProfileViewProps) {
   const activeRentals = rentals.filter((r) => r.escrowStatus !== 'Deposit Refunded');
   const heldEscrow = activeRentals.reduce((sum, r) => sum + r.depositAmount, 0);
-  const totalSaved = rentals.reduce(
-    (sum, r) => sum + Math.max(0, r.retailPrice - (r.rentalFee + r.platformFee)),
-    0
-  );
+  const refundedDeposits = rentals
+    .filter((r) => r.escrowStatus === 'Deposit Refunded')
+    .reduce((sum, r) => sum + r.depositAmount, 0);
+  const retailSavings = rentals
+    .filter((r) => r.orderRole === 'borrowed')
+    .reduce(
+      (sum, r) => sum + Math.max(0, r.retailPrice - (r.rentalFee + r.platformFee)),
+      0
+    );
+  const totalSavedAndRefunded = retailSavings + refundedDeposits;
   // Realistic semester earnings baseline + user listings potential
   const estimatedEarnings = 640 + userListings.reduce((sum, item) => sum + item.rate, 0);
 
@@ -127,11 +133,13 @@ export function ProfileView({
       {/* 4-Column Tabular Dashboard KPI Strip */}
       <section aria-label="Student savings and escrow metrics" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200/80 p-5">
-          <p className="text-xs font-medium text-slate-500">Total Money Saved</p>
+          <p className="text-xs font-medium text-slate-500">Total Saved / Refunded</p>
           <p className="font-mono text-2xl font-bold text-emerald-700 mt-1.5 tabular-nums">
-            ₹{totalSaved.toLocaleString('en-IN')}
+            ₹{totalSavedAndRefunded.toLocaleString('en-IN')}
           </p>
-          <p className="text-xs text-slate-500 mt-1">vs. buying new retail</p>
+          <p className="text-xs text-slate-500 mt-1 tabular-nums">
+            Includes ₹{refundedDeposits.toLocaleString('en-IN')} deposits refunded
+          </p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200/80 p-5">
@@ -152,7 +160,7 @@ export function ProfileView({
             onClick={onGoToRentals}
             className="text-xs font-semibold text-[#1E3A8A] hover:underline mt-1 cursor-pointer"
           >
-            View {activeRentals.length} active {activeRentals.length === 1 ? 'rental' : 'rentals'} →
+            View Order History ({activeRentals.length} active) →
           </button>
         </div>
 
